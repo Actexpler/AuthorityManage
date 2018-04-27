@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>部门列表</title>
+    <link href="../../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="../../js/jquery.min.js"></script>
+    <script type="text/javascript">
+         $(function () {
+             var pageNo = $("#curPage").val();
+             var url ="/getDepartLists?pageNo="+pageNo;
+             function getPage(data){
+                 var jsonObj = JSON.parse( data );  // JSON.parse(); 解析JSON
+                 var totalRecord = jsonObj.totalRecord;   //一共几条数据
+                 var dataList = jsonObj.data;    //查询出的数据
+
+                 var totalPage = jsonObj.totalPage;   //共多少页
+                 var pageNum = jsonObj.pageNum;    //第几页
+                 var pageSize = jsonObj.pageSize;  //每页几条
+                 var start = jsonObj.startPageNum;  //开始
+                 var end = jsonObj.endPageNum;      //结束
+                 $("#curPage").val(pageNum);
+
+                 $("#totalRecord").html(totalRecord);
+                 $("#totalPage").html(totalPage);
+                 $("#pageSize").attr("value",pageSize);
+
+                 $("tbody > *").remove();
+                 if(dataList!=null){
+                     for (i = 0; i < dataList.length; i++) {
+                         $("#show_tbody").append("<tr></tr>");
+                         $("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+dataList[i].dId+"</td>");
+                         $("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+dataList[i].dName+"</td>");
+                         $("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+dataList[i].dCompany.cName+"</td>");
+                         $("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+dataList[i].dStatus+"</td>");
+                         $("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+"<a href='#' class='update'>修改</a>/<a href='#' class='del'>删除</a>"+"</td>");
+                     }
+                 }else{
+                     $("#show_tbody").append("<label>没有数据</label>");
+                 }
+
+                 $(".pNum").remove();
+                 $("li:empty").remove();
+                 for(var i = parseInt(end); i>=parseInt(start);i--){
+                     if(i ==parseInt(pageNum) ){
+                         var li1= '<li><input style="background-color:#00FFFF" type="button" class="pNum btn" value="'+i+'"></li>'
+                         $("#lastpage").parent().after(li1);
+                     }else{
+                         var li1= '<li><input type="button" class="pNum btn btn-info" value="'+i+'"></li>'
+                         $("#lastpage").parent().after(li1);
+                     }
+                 }
+
+             }
+             var type = "text";
+             $.ajax({
+                    method:'POST',
+                    url:url,
+                    //data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'DepartService_getDepartLists'},
+                    success: getPage
+				
+				});
+             //$.post(url,getPage,type);
+
+             //页面跳转
+             $("#npage").click(function(){
+                 pageNo = $("#curPage").val();
+                 $("#page").val(pageNo);
+                 /* alert($("#page").val()); */
+                 var url ="/getDepartLists";
+                 var data = $("#departForm").serialize();
+                 var type = "text";
+                 $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'DepartService_getDepartLists'},
+                    success: getPage
+				
+				});
+                 //$.post(url,data,getPage,type);
+             });
+             //下一页
+             $("#nextpage").click(function(){
+                 pageNo=parseInt($("#curPage").val())+1;
+                 $("#page").val(pageNo);
+                 /* alert($("#page").val()); */
+                 var url ="/getDepartLists";
+                 var data = $("#departForm").serialize();
+                 var type = "text";
+                 $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'DepartService_getDepartLists'},
+                    success: getPage
+				
+				});
+                 //$.post(url,data,getPage,type);
+
+             });
+             //上一页
+             $("#lastpage").click(function(){
+                 pageNo=parseInt($("#curPage").val())-1;
+                 $("#page").val(pageNo);
+                 /* alert($("#page").val()); */
+                 var url ="/getDepartLists";
+                 var data = $("#departForm").serialize();
+                 var type = "text";
+                 $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'DepartService_getDepartLists'},
+                    success: getPage
+				
+				});
+                 //$.post(url,data,getPage,type);
+
+             });
+             //页码按钮跳转
+             $('#menu').on('click','.pNum',function(){
+                 var pageNum = $(this).val();
+                 $("#page").val(pageNum);
+                 /* alert($("#page").val()); */
+                 var url ="/getDepartLists";
+                 var data = $("#departForm").serialize();
+                 var type = "text";
+                 $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'DepartService_getDepartLists'},
+                    success: getPage
+				
+				});
+                 //$.post(url,data,getPage,type);
+             });
+
+             //搜索
+             $("#search").click(function(){
+                 var url ="/getDepartLists";
+                 /* $("#companyForm").attr("action",url); */
+                 var data = $("#departForm").serialize();
+                 var type = "text";
+                 $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'DepartService_getDepartLists'},
+                    success: getPage
+				
+				});
+                 //$.post(url,data,getPage,type);
+                 return false;
+             });
+             //显示所有
+             $("#AllList").click(function(){
+                 $("#page").val(1);
+                 /* alert($("#page").val());  */
+                 $(".searchEntry").val("");
+                 var url ="/getDepartLists";
+                 var data = $("#departForm").serialize();
+                 var type = "text";
+                 $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'DepartService_getDepartLists'},
+                    success: getPage
+				
+				});
+                 //$.post(url,data,getPage,type);
+             });
+             //删除
+             $('#show_tbody').on('click','.del',function(){
+                 var pageNo = $("#curPage").val();
+
+                 var thisTd = $(this).parent();
+                 var thisId = $(thisTd).siblings(":first").text();
+                 //获取该用户的id  定位到父节点的第一个兄弟节点
+                 function callback(data){
+                     if(data.length !=0){
+                         alert("删除成功");
+                         //重新加载用户列表
+                         getPage(data);
+                     }
+                 }
+                 var url="/delDepartment?id="+thisId+"&pageNo="+pageNo;
+                 var type = "text";
+                 //$.post(url,callback,type);
+                 $.ajax({
+                    method:'POST',
+                    url:url,
+                    //data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'DepartService_delDepartment'},
+                    success: callback
+				
+				});
+             });
+             //点击新建
+             $("#add").click(function () {
+                 $(".departName").val("");
+                 $("#addCForm").css({"visibility":"visible"});
+                 var url ="/getComLists";
+                 var type = "json";
+                 function  callback(data){
+                     $("select > *").remove();
+                     if(data!=null){
+                         for(var i = 0;i<data.length;i++){
+
+                             $("#comId").append("<option  value='"+data[i].cId+"'>"+data[i].cName+"</option>");
+                         }
+                     }
+                 }
+                 $.ajax({
+                    method:'POST',
+                    url:url,
+                    //data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'DepartService_getComLists'},
+                    success: callback
+				
+				});
+                 //$.post(url,callback,type);
+                 return false;
+             });
+             //保存新建公司信息
+             $("#save").click(function () {
+                 var list=$(".must");
+                 for (var i = 0; i < list.length; i++) {
+                     // 判断文本框是否为空
+                     if (list[i].value == "") {
+                         alert("请将必要信息填写完整");
+                         return false;
+                     }
+                 }
+
+                 var url = "/addDepartment";
+                 var data = $("#addForm").serialize();
+                  alert(JSON.stringify(data));
+                 function callback(data){
+                     // $("#addCForm").hide();
+                     $("#addCForm").css({"visibility":"hidden"});
+                     if(data.length !=0){
+                         alert("保存成功");
+                         //重新加载用户列表
+                         getPage(data);
+
+                     }else {
+                         alert("保存失败");
+                     }
+
+                 }
+                 var type = "text";
+                 $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'DepartService_addDepartment'},
+                    success: callback
+				
+				});
+                 //$.post(url,data,callback,type);
+                 return false;
+             });
+             //关闭新建窗口
+             $("#close").click(function () {
+                 $("#addCForm").css({"visibility":"hidden"});
+                 return false;
+             });
+             //关闭更新窗口
+             $("#closeU").click(function () {
+                 $("#uptCForm").css({"visibility":"hidden"});
+                 return false;
+             });
+
+
+             //更新部门信息
+             $('#show_tbody').on('click','.update',function () {
+                 var thisTd = $(this).parent();
+                 var thisId = $(thisTd).siblings(":first").text();
+                 var url="/getDepartByID?dId="+thisId;
+                 var type = "json";
+                 function uptback(data){
+                     var dep = data.depart;
+                     var comp=data.companyLists;
+                     var pageNum= $("#curPage").val();
+                     $("#pageNum").val(pageNum);
+                     $("#dId").val(dep.dId);
+                     $("#dName").val(dep.dName);
+                     /*$("#cId").val(dep.dCompany.cId);
+                     $("#cName").val(dep.dCompany.cName);*/
+                     $(":radio[name='dStatus'][value='" + dep.dStatus + "']").prop("checked", "checked");
+
+                     $("select > *").remove();
+                     if(comp!=null){
+
+                         for(var i = 0;i<comp.length;i++){
+
+                             $("#cId").append("<option  value='"+comp[i].cId+"'>"+comp[i].cName+"</option>");
+                         }
+                         var comId = dep.dCompany.cId;
+                         $("#cId ").val(comId);
+
+                     }
+
+
+                     $("#uptCForm").css({"visibility":"visible"});
+                 }
+                 $.ajax({
+                    method:'POST',
+                    url:url,
+                    //data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'DepartService_getDepartByID'},
+                    success: uptback
+				
+				});
+                 //$.post(url,uptback,type);
+             });
+             //保存更新
+             $("#saveU").click(function () {
+                 var list=$(".must2");
+                 for (var i = 0; i < list.length; i++) {
+                     // 判断文本框是否为空
+                     if (list[i].value == "") {
+                         alert("请将必要信息填写完整");
+                         return false;
+                     }
+                 }
+                 var url = "/updateDepartment";
+                 var data = $("#uptForm").serialize();
+                /* alert(data);*/
+                 function callback(data){
+                     // $("#addCForm").hide();
+                     $("#uptCForm").css({"visibility":"hidden"});
+                     if(data.length !=0){
+                         alert("保存成功");
+                         //重新加载用户列表
+                         getPage(data);
+
+                     }else {
+                         alert("保存失败");
+                     }
+
+                 }
+                 var type = "text";
+                 $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'DepartService_updateDepartment'},
+                    success: callback
+				
+				});
+                 //$.post(url,data,callback,type);
+                 return false;
+             });
+         });
+    </script>
+    <style type="text/css">
+        #menu li{
+            text-decoration: none;  /*去掉前面的圆点*/
+            list-style: none;
+            float: left;
+            border: 1px solid #FFFFFF;
+
+        }
+        #menu li a{
+            text-decoration: none;
+        }
+
+        #menu li a:hover{
+            background-color: #FCFCFC;
+        }
+        .toast{
+            width:700px;
+            height:400px;
+            background:transparent;
+            background:#AFAFAF;
+            border-radius:8px;
+            position: fixed;
+            margin:auto;left:0; right:0; top:0; bottom:0;
+            z-index: 1;
+
+        }
+
+
+    </style>
+</head>
+<body>
+<form action="" method="post" id="departForm">
+
+    <div style="padding-top: 1%;padding-bottom: 1%;padding-left: 1%;">
+        <ul class="nav">
+
+            <li class="nav-item" style="padding-right: 30px;">
+                <a href="#" id="AllList" ><h3>部门列表</h3></a>
+            </li>
+            <li class="nav-item" style="padding-right: 5px;width: 100px;">
+                <input type="hidden" name="pageNo" id="page" value="1">
+            </li>
+            <li class="nav-item" style="padding-right: 5px;width: 100px;">
+                <input type="text" name="search_dId" class="form-control searchEntry"  placeholder="部门号" >
+            </li>
+            <li class="nav-item" style="padding-right: 5px;width: 100px;">
+                <input type="text" name="search_dName" class="form-control searchEntry"  placeholder="部门名" >
+            </li>
+            <li class="nav-item" style="padding-right: 5px;width: 100px;">
+                <input type="text" name="search_cName" class="form-control searchEntry" placeholder="公司名" >
+            </li>
+            <li class="nav-item" style="padding-right: 10px">
+                <button class="btn btn-info" id="search">搜索</button>
+            </li>
+            <li class="nav-item" style="padding-right: 10px;">
+                <button class="btn btn-default" id="add">添加</button>
+            </li>
+        </ul>
+    </div>
+
+    <table  class="table table-striped" id="tb">
+        <thead >
+        <tr>
+            <th class="data_title" style="text-align: center;" >部门编号</th>
+            <th class="data_title" style="text-align: center;" >部门名称</th>
+            <th class="data_title" style="text-align: center;" >公司名称</th>
+            <th class="data_title" style="text-align: center;" >部门状态</th>
+        </tr>
+        </thead>
+        <tbody id="show_tbody">
+
+        </tbody>
+
+    </table>
+    <div style="padding-left: 50%;" >
+        <ul  id="menu">
+            <li><input id="lastpage" type="button" class="btn btn-default" value="上一页" ></li>
+            <li><input id="nextpage" type="button" class="btn btn-default" value="下一页"></li>
+            <li><input id="curPage" type="text" class="form-control" value="1" size="2"></li>
+            <li><input id="npage" type="button" class="btn btn-default" value="跳转"></li>
+            <li class="list-group-item"> <span>共</span> <label id="totalRecord"></label><span>条记录</span><label id="totalPage"></label><span>页</span></li>
+        </ul>
+    </div>
+</form>
+
+
+
+
+<div id="addCForm"  class="toast" style="visibility:hidden; ">
+    <label style="margin: 5px 0 15px 40%;"><span style="color: black">新建部门信息</span></label>
+    <form method="post" action="" id="addForm">
+        <table class="table table-striped" id="aTb">
+            <thead>
+            <tr>
+                <th class="data_cell" style="text-align: center;"><span style="color: black">部门名称</span></th>
+                <th>
+                  <!--  <input type="hidden" id="pageNo" name="pageNo">-->
+                    <input type="text" class="must departName" name="dName">
+                </th>
+
+            </tr>
+
+            <tr>
+                <th class="data_cell" style="text-align: center;"><span style="color: black">信息是否可用</span></th>
+                <th>
+                    <input type="radio" name="dStatus" checked="checked" value="1"><span style="color: black">可用</span>
+                    <input type="radio" name="dStatus" value="0"><span style="color: black">不可用</span>
+                </th>
+            </tr>
+
+            <tr>
+                <th class="data_cell" style="text-align: center;"><span style="color: black">公司名称</span></th>
+                <th>
+                    <!--<input type="hidden" name="cId" id="cId">
+                    <input type="text" class="must" name="cName" id="cName">-->
+                    <select  class="selectpicker" id="comId" name="comId" title="选择公司...">
+                        <option id="" value=""></option>
+                    </select>
+                </th>
+
+            </tr>
+            </thead>
+        </table>
+
+        <div class="button_bar" style="margin: 30px  0 0 30%">
+            <button class="btn btn-default" id="close">关闭</button>
+            <button class="btn btn-info" id="save" style="margin-left: 40px;">保存</button>
+        </div>
+    </form>
+</div>
+
+<div id="uptCForm"  class="toast" style="visibility:hidden; ">
+    <label style="margin: 5px 0 15px 40%;"><span style="color: black">更新部门信息</span></label>
+    <form method="post" action="" id="uptForm">
+        <table class="table table-striped" id="uTb">
+            <thead>
+            <tr>
+                <th class="data_cell" style="text-align: center;"><span style="color: black">部门编号</span></th>
+                <th>
+                    <input type="hidden" name="pageNo" id="pageNum">
+                    <input type="text" class="must2" name="dId" id="dId" readonly="readonly">
+                </th>
+                <th class="data_cell" style="text-align: center;"><span style="color: black">部门名称</span></th>
+                <th>
+                    <input type="text" class="must2" name="dName" id="dName">
+                </th>
+
+            </tr>
+
+            <tr>
+
+                <th class="data_cell" style="text-align: center;"><span style="color: black">公司名称</span></th>
+                <th>
+                    <!--<input type="hidden" name="cId" id="cId">
+                    <input type="text" class="must2" name="cName" id="cName">-->
+                    <select  class="selectpicker" id="cId" name="cId" title="选择公司...">
+
+                    </select>
+                </th>
+
+                <th class="data_cell" style="text-align: center;"><span style="color: black">信息是否可用</span></th>
+                <th>
+                    <input type="radio" name="dStatus" checked="checked" value="1"><span style="color: black">可用</span>
+                    <input type="radio" name="dStatus" value="0"><span style="color: black">不可用</span>
+                </th>
+            </tr>
+
+
+            </thead>
+        </table>
+
+        <div class="button_bar" style="margin: 30px  0 0 30%">
+            <button class="btn btn-default" id="closeU">关闭</button>
+            <button class="btn btn-info" id="saveU" style="margin-left: 40px;">保存</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

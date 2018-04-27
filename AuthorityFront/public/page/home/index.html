@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>权限后台管理</title>
+    <link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script  type="text/javascript" src="../../js/bootstrap.min.js" ></script>
+    <script  type="text/javascript" src="../../js/bootstrap.js" ></script>
+    <script type="text/javascript">
+        $(function(){
+            $("#div_center").append('<iframe src="./welcome.html" width="1600" height="800" scrolling="no" frameborder="0"> </iframe>');
+            //人员列表
+            $("#userList").click(function(){
+                $("#div_center > *").remove();
+                $("#div_center").append('<iframe src="../User/userList.html" width="1600" height="800" scrolling="no" frameborder="0"> </iframe>');
+            });  
+            //角色列表
+            $("#roleList").click(function(){
+                $("#div_center  > *").remove();
+                $("#div_center").append('<iframe src="../Role/roleList.html" width="1600" height="800" scrolling="no" frameborder="0"> </iframe>');
+            });
+            //部门列表
+            $("#departList").click(function(){
+                $("#div_center  > *").remove();
+                $("#div_center").append('<iframe src="../Depart/departList.html" width="1600" height="800" scrolling="no" frameborder="0"> </iframe>');
+            });
+            //公司列表
+            $("#companyList").click(function(){
+                $("#div_center  > *").remove();
+                $("#div_center").append('<iframe src="../Company/companyList.html" width="1600" height="800" scrolling="no" frameborder="0"> </iframe>');
+            });
+            //权限列表
+            $("#authorityList").click(function(){
+                $("#div_center  > *").remove();
+                $("#div_center").append('<iframe src="../Authority/authority.html" width="1600" height="800" scrolling="no" frameborder="0"> </iframe>');
+            });
+            //home
+            $("#home_btn").click(function(){
+                $("#div_center  > *").remove();
+                $("#div_center").append('<iframe src="./welcome.html" width="1600" height="800" scrolling="no" frameborder="0"> </iframe>');
+            });
+
+        });
+
+    </script>
+    <style type="text/css">
+
+    .myli:hover{
+        background-color:rgba(194, 194, 194, 0.747);
+    }
+    </style>
+
+</head>
+<body>
+        <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <nav class="navbar navbar-toggleable-md navbar-light bg-faded fixed-top">
+                                     
+                                    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                                        <span class="navbar-toggler-icon"></span>
+                                    </button> <a class="navbar-brand" id="home_btn" href="#">权限管理后台</a>
+                                    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                                        <ul class="navbar-nav">
+                                            <li class="nav-item myli">
+                                                 <a class="nav-link" id="userList" href="#">人员列表 <span class="sr-only">(current)</span></a>
+                                            </li>
+                                            <li class="nav-item myli">
+                                                 <a class="nav-link" id="roleList" href="#">角色列表</a>
+                                            </li>
+                                            <li class="nav-item myli">
+                                                    <a class="nav-link" id="departList" href="#">部门列表</a>
+                                               </li>
+                                               <li class="nav-item myli">
+                                                    <a class="nav-link" id="companyList" href="#">公司列表</a>
+                                               </li>
+                                               <li class="nav-item myli">
+                                                    <a class="nav-link" id="authorityList" href="#">权限列表</a>
+                                               </li>
+
+                                           
+                                        </ul>
+                                       
+                                        <ul class="navbar-nav ml-md-auto">
+                                            <li class="nav-item active">
+                                                 <a class="nav-link" href="#">欢迎 <span class="sr-only">(current)</span></a>
+                                            </li>
+                                            <li class="nav-item myli">
+                                                    <a class="nav-link" href="#">注销 <span class="sr-only">(current)</span></a>
+                                            </li>
+                                            
+                                        </ul>
+                                    </div>
+                                </nav>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div id="div_center" class="col-md-12" style="height: 800px; padding-top: 60px;">
+                                     
+                            </div>
+                        </div>
+                        <div class="row">
+                                <div class="col-md-12">
+                                    <nav class="navbar navbar-toggleable-md navbar-light bg-faded fixed-bottom">
+                                        <blockquote class="blockquote text-right">
+                                            <footer class="blockquote-footer">
+                                                Someone famous in <cite>Source Title</cite>
+                                            </footer>
+                                        </blockquote>
+                                    </nav>
+                                </div>
+                        </div>
+                </div>
+            </div>
+</body>
+</html>

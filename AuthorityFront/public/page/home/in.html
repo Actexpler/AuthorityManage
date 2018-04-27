@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>首页</title>
+    <link href="../../css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="../../css/login.css?v=1.0">
+    <script  type="text/javascript" src="../../js/jquery.min.js" ></script>
+    <script type="text/javascript">
+       $(function(){
+           $("#userList").click(function(){
+                $.ajax( {
+                    url: '../User/userList.html', //这里是静态页的地址
+                    type: "GET", //静态页用get方法，否则服务器会抛出405错误
+                    success: function(data){
+                        var result = $(data).find("#bodyDiv");
+                        $("#div_center").html(result);
+
+
+                    }
+                });
+           });  
+          
+          
+
+       });
+    
+    </script>
+    <style type="text/css">
+     a{
+        height: 60px;
+        line-height: 40px;
+        font-size:20px;
+        text-align: center;
+
+     }
+     span{
+        height: 60px;
+        line-height: 50px;
+        font-size:20px;
+        text-align: center;
+     }
+     .myli:hover{
+         background-color:gray;
+     }
+    
+    </style>
+</head>
+<body>
+    <div id="" >
+            <div class="hearder" style="background-color: rgba(231, 231, 253, 0.842);width:100%;position:fixed;">
+                    <!-- Nav pills -->
+                    <ul class="nav" style="width: 100%;height:30%;margin-left:10px;">
+                            <li class="nav-item" ><span>权限管理后台</span></li>
+                            <li class="nav-item myli" >
+                              <a class="nav-link" href="#" id="userList">人员列表</a>
+                            </li>
+                            <li class="nav-item myli">
+                              <a class="nav-link" href="#" >角色列表</a>
+                            </li>
+                            <li class="nav-item myli">
+                              <a class="nav-link" href="#" >部门列表</a>
+                            </li>
+                            <li class="nav-item myli">
+                              <a class="nav-link" href="#" >公司列表</a>
+                            </li>
+                            <li class="nav-item myli">
+                               <a class="nav-link" href="#" >权限列表</a>
+                            </li>
+                            <li class="nav-item" style="margin: 0 10px 0 30%">
+                                <span style="float: left;">欢迎您：</span><a class="nav-link" href="#" style="float: left;">hh</a>
+                            </li>
+                            <li class="nav-item myli" >
+                                <a class="nav-link" href="#" >注销</a>
+                            </li>
+                    </ul>
+             </div>
+
+             <div class="center" id="div_center" style="background:url(../../images/welcome.jpg);">
+                 <div style="position: absolute;">
+
+                 </div>
+             </div>
+             <div class="footer"style="height:15px;background-color:	SkyBlue;width:100%;position:fixed;bottom:0;left:0;">
+
+
+             </div>
+
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户信息更新</title>
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../js/jquery.params.js"></script>
+    <script type="text/javascript">
+        //日期格式化方法
+        Date.prototype.format = function(format){
+            var o = {
+                "M+" : this.getMonth()+1, //month
+                "d+" : this.getDate(), //day
+                "h+" : this.getHours(), //hour
+                "m+" : this.getMinutes(), //minute
+                "s+" : this.getSeconds(), //second
+                "q+" : Math.floor((this.getMonth()+3)/3),      //quarter
+                "S" : this.getMilliseconds() //millisecond
+            }
+
+            if(/(y+)/.test(format)) {
+                format = format.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));
+            }
+
+            for(var k in o) {
+                if(new RegExp("("+ k +")").test(format)) {
+                    format = format.replace(RegExp.$1, RegExp.$1.length==1 ? o[k] : ("00"+ o[k]).substr((""+ o[k]).length));
+                }
+            }
+            return format;
+        }
+
+        $(function () {
+            //数据的回显
+            var pageNo =$.query.get("pageNo");
+
+            var uId  = $.query.get("uId");
+            var url ="/getUserById";
+            var data = {"uId":uId };
+            var type ="json";
+            function callback(data) {
+                //返回User  和 部门列表信息 和 本部门的角色列表 以便回显
+                var user = data.user;
+                var departList = data.departList;
+                var roleList = data.roleList;
+
+                //用户基本信息的回显
+                $("#uId").val(user.uId);
+                $("#uName").val(user.uName);
+                $("#uAge").val(user.age);
+                $("#uPwd").val(user.pwd);
+                $(":radio[name='uSex'][value='" + user.sex+ "']").prop("checked", "checked");
+                $(":radio[name='uStatus'][value='" + user.status + "']").prop("checked", "checked");
+                /* UTC 日期格式转换成 date 格式，并将日期格式进行格式化  */
+                var date2 = new Date(user.birthday).format("yyyy-MM-dd");
+                /* 转换成本地日期 */
+                var birthday = date2.toLocaleString();
+                $("#uBirthday").val(birthday);
+
+                //部门的回显
+                if( departList.length != 0){
+                    for ( var i = 0 ; i < departList.length; i++){
+                        var dId = departList[i].dId;
+                        var dName = departList[i].dName;
+                        var cName = departList[i].dCompany.cName;
+                        $("#dId").append("<option  value='"+dId+"'>"+dName+"/"+cName+"</option>");
+                    }
+                    $("#dId ").val(user.uDepart.dId);
+
+                    if(roleList.length!=0){
+                        for ( var i = 0 ; i < roleList.length; i++){
+                            var rId = roleList[i].rId;
+                            var rName = roleList[i].rName;
+
+                            $("#rId").append("<option  value='"+rId+"'>"+rName+"</option>");
+                        }
+                        if(user.uRole.rId!=null) {
+                            $("#rId ").val(user.uRole.rId);
+                        }
+                    }
+                }
+                return false;
+
+            }
+
+            $.ajax({
+				method:'POST',
+				url:url,
+				data: data,
+				dataType:type,
+				headers:{
+					'Service-Name':'UserService_getUserById'},
+				success: callback
+				
+				});  
+           // $.post(url,data,callback,type);
+
+            //部门角色联动
+            $("#dId").change(function () {
+                var d_id = $("#dId").val();
+
+                var url = "/getRoleByDepart?dId="+d_id;
+                var type = "json";
+                function callback(data){
+                    $("#tit").nextAll().remove();
+                    if(data.length != 0){
+                        for ( var j = 0; j<data.length;j++ ){
+                            var rId = data[j].rId;
+                            var rName = data[j].rName;
+                            $("#rId").append("<option  value='"+rId+"'>"+rName+"</option>");
+                        }
+                        $("#tit").text("请选择角色...");
+                    }
+                }
+                $.ajax({
+                    method:'POST',
+                    url:url,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'UserService_getUserById'},
+                    success: callback
+                    
+				});  
+
+                //$.post(url,callback,type);
+            });
+
+
+            //更新保存
+            $("#save").click(function () {
+                var list=$(".must");
+                for (var i = 0; i < list.length; i++) {
+                    // 判断文本框是否为空
+                    if (list[i].value == "") {
+                        alert("请将必要信息填写完整");
+                        return false;
+                    }
+                }
+
+
+                var age  = $("#uAge").val();
+
+                if(age != null ){
+                    var ex = /^[-+]?\d+$/;
+                    if (!ex.test(age)) {
+                        alert("不是整数");
+                        return false;
+                    }
+
+
+
+                    if( age <=0 || age >150){
+                        alert("请填写正确的年龄");
+                        return false;
+                    }
+                }
+                var data = $("#addForm").serialize();
+                var url = "/updateUser";
+                function callback(data) {
+                    if(data){
+                        alert("pageNo"+pageNo);
+                        window.location.href="/page/userList.html?pageNo="+pageNo;
+                        return false;
+                    }else {
+                        alert("保存失败");
+                        return false;
+                    }
+
+                }
+                var type = "json";
+                $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'UserService_updateUser'},
+                    success: callback
+				
+				});  
+                //$.post(url,data,callback,type);
+            });
+
+
+        });
+        
+    </script>
+</head>
+<body>
+        <div id="addCForm"  class="toast">
+            <div style="padding-top: 1%;padding-bottom: 1%;padding-left: 1%;">
+                <ul class="nav">
+                    <li class="nav-item" style="padding-right: 10px;">
+                        <button class="btn btn-default"  onclick="javascript:window.history.back(-1);">返回</button>
+                    </li>
+                    <li class="nav-item" style="padding-right: 10px">
+                        <button class="btn btn-info" id="save">保存</button>
+                    </li>
+                </ul>
+            </div>
+
+
+            <form method="post" action="" id="addForm">
+                <table class="table table-striped" id="aTb">
+                    <thead>
+                    <tr>
+                        <th class="data_cell" style="text-align: center;"><span style="color: black">用户名</span></th>
+                        <th>
+                            <input type="hidden" name="uId" id="uId">
+                            <input type="text" class="must" name="uName" id="uName">
+                        </th>
+
+                        <th class="data_cell" style="text-align: center;"><span style="color: black">性别</span></th>
+                        <th>
+                            <input type="radio" name="uSex"  value="1">男
+                            <input type="radio" name="uSex" value="0">女
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="data_cell" style="text-align: center;"><span style="color: black">年龄</span></th>
+                        <th>
+                            <input type="text"  name="uAge" id="uAge">
+
+                        </th>
+                        <th class="data_cell" style="text-align: center;"><span style="color: black">出生年月</span></th>
+                        <th>
+                            <input type="date"  name="uBirthday" id="uBirthday">
+                        </th>
+
+                    </tr>
+                    <tr>
+                        <th class="data_cell" style="text-align: center;"><span style="color: black">部门名称</span></th>
+                        <th>
+                            <select  class="selectpicker" id="dId" name="dId" title="选择部门...">
+                                <option  value="">请选择部门...</option>
+                            </select>
+                        </th>
+                        <th class="data_cell" style="text-align: center;"><span style="color: black">角色名称</span></th>
+                        <th>
+                            <select  class="selectpicker" id="rId" name="rId">
+                                <option id="tit"  value="">请先选择部门...</option>
+                            </select>
+                        </th>
+                    </tr>
+
+                    <tr>
+                        <th class="data_cell" style="text-align: center;"><span style="color: black">密码</span></th>
+                        <th>
+                            <input type="password" name="uPwd" id="uPwd">
+                        </th>
+                        <th class="data_cell" style="text-align: center;"><span style="color: black">信息是否可用</span></th>
+                        <th>
+                            <input type="radio" name="uStatus"  value="1">可用</span>
+                            <input type="radio" name="uStatus" value="0"><span style="color: black">不可用</span>
+                        </th>
+                    </tr>
+
+                    </thead>
+                </table>
+
+            </form>
+        </div>
+
+</body>
+</html>

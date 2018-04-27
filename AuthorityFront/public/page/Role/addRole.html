@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>角色添加</title>
+    <link href="../../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" >
+        $(function () {
+           //初始化部门信息
+           var url = "/getDepart";
+            function callback(data){
+                for ( var i = 0 ; i < data.length; i++){
+                    var dId = data[i].dId;
+                    var dName = data[i].dName;
+                    var cName = data[i].dCompany.cName;
+                    $("#dId").append("<option  value='"+dId+"'>"+dName+"/"+cName+"</option>");
+                }
+                 return false;
+            }
+            var type = "json";
+            $.ajax({
+                    method:'POST',
+                    url:url,
+                    // data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'RoleService_getDepart'},
+                    success: callback
+				
+				}); 
+            //$.post(url,callback,type);
+
+            //保存新建信息
+
+            $("#add").click(function(){
+                var url = "/addRole";
+                var data = $("#addForm").serialize();
+
+                function callback(result){
+                    alert(result);
+                    if(result == '1'){
+                        window.location.href="/page/roleList.html";
+                        return false;
+
+                    }
+
+
+                }
+                var type = "json";
+                $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'RoleService_addRole'},
+                    success: callback
+				
+				}); 
+                //$.post(url, data, callback,type);
+            });
+        });
+    </script>
+</head>
+<body>
+
+<div id="addCForm"  class="toast">
+    <div style="padding-top: 1%;padding-bottom: 1%;padding-left: 1%;">
+        <ul class="nav">
+            <li class="nav-item" style="padding-right: 10px;">
+                <button class="btn btn-default"  onclick="javascript:window.history.back(-1);">返回</button>
+            </li>
+            <li class="nav-item" style="padding-right: 10px">
+                <button class="btn btn-info" id="add">保存</button>
+            </li>
+        </ul>
+    </div>
+
+
+    <form method="post" action="" id="addForm">
+        <table class="table table-striped" id="aTb">
+            <thead>
+            <tr>
+                <th class="data_cell" style="text-align: center;"><span style="color: black">角色名称</span></th>
+                <th>
+                    <input type="text" class="must roleName" name="rName">
+                </th>
+
+            </tr>
+            <tr>
+                <th class="data_cell" style="text-align: center;"><span style="color: black">角色信息</span></th>
+                <th>
+                    <input type="text" class="must" name="rInfo">
+                </th>
+
+            </tr>
+            <tr>
+                <th class="data_cell" style="text-align: center;"><span style="color: black">部门名称</span></th>
+                <th>
+                    <select  class="selectpicker" id="dId" name="dId" title="选择部门...">
+                        <option id="" value=""></option>
+                    </select>
+                </th>
+            </tr>
+
+            <tr>
+                <th class="data_cell" style="text-align: center;"><span style="color: black">信息是否可用</span></th>
+                <th>
+                    <input type="radio" name="rStatus" checked="checked" value="1"><span style="color: black">可用</span>
+                    <input type="radio" name="rStatus" value="0"><span style="color: black">不可用</span>
+                </th>
+            </tr>
+
+            </thead>
+        </table>
+
+    </form>
+</div>
+
+</body>
+</html>

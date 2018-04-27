@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>增加权限</title>
+<link href="../../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<script src="../../js/jquery.min.js"></script>
+<script src="../../js/jquery.params.js"></script>
+<script type="text/javascript">
+   $(function(){
+	   var node = $.query.get("node");
+	   var param = decodeURI(node);
+	   var parent = JSON.parse(param);
+	   $("#parentId").val(parent.aId);
+	   $("#parentName").val(parent.aName);
+	   
+	   $("#save").click(function(){
+		   var list=$(".must");
+   		   for (var i = 0; i < list.length; i++) {
+	   			// 判断文本框是否为空
+	   			if (list[i].value == "") {
+		   			alert("请将必要信息填写完整");
+		   			return false;
+	   			 }
+   			} 
+   		   
+   		   var url="/addAuthority";
+		   var data=$("#saveForm").serialize();
+		   alert(data);
+		   type="json";
+		   function insertResult(data){
+			   if(data==true){
+				   alert("添加失败");
+				   window.location.href="/page/authority.html";
+			   }
+			   else{
+				   alert("添加失败");
+			   }
+		   }
+		   $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'AuthorityService_addAuthority'},
+                    success: insertResult
+				
+				});  
+		   //$.post(url,data,insertResult,type);
+	   });
+   });
+
+</script>
+</head>
+<body>
+    
+    <div class="button_bar">
+            <button class="btn btn-info" id="save">保存</button>
+			<button class="btn btn-default" onclick="javascript:history.back(-1);">返回</button>
+	</div>
+  	<form id="saveForm" class="form-horizontal" action="${ctx}/updateEmployee.action" method="post" >
+	  	<span class="page_title">添加子权限</span>
+		<table  class="table-bordered" style="width: 80%;">
+			<tr>
+			    <th class="input_title" style="text-align: center;">父权限编号</th>
+				<td class="input_content">
+				   <input type="text" id="parentId" name="parentId" readonly="readonly">
+				   
+				</td>
+				 <th class="input_title" style="text-align: center;">父权限名称 </th>
+				<td class="input_content">
+					<input type="text"  id="parentName" name="parentName" readonly="readonly">  
+				</td> 
+				
+				
+			</tr> 
+			<tr>
+			<th class="input_title" style="text-align: center;">权限名称<span class="red_star" >*</span></th>
+				<td class="input_content">
+					<input type="text" class="must" id="aName" name="aName">
+				</td>
+				
+				<th class="input_title" style="text-align: center;">权限状态<span class="red_star" >*</span></th>
+				<td class="input_content">
+					<input type="radio" class="must" id="status1" name="status" value="1" checked="checked">可用
+					<input type="radio" class="must" id="status2" name="status" value="0" >不可用
+				</td>
+			</tr>
+			<tr>
+				<th class="input_title" style="text-align: center;">备注信息<span class="red_star" >*</span></th>
+				<td class="input_content">
+					<input type="text" class="must" id="info" name="info">
+				</td>
+				
+				<th class="input_title" style="text-align: center;"></th>
+				<td class="input_content">
+					
+				</td>
+			</tr>			
+		</table> 
+	</form>    
+</body>
+</html>

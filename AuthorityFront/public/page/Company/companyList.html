@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>公司列表</title>
+    <link href="../../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <script src="../../js/jquery.min.js"></script>
+    <script type="text/javascript">
+
+        //日期格式化方法
+        Date.prototype.format = function(format){
+            var o = {
+                "M+" : this.getMonth()+1, //month
+                "d+" : this.getDate(), //day
+                "h+" : this.getHours(), //hour
+                "m+" : this.getMinutes(), //minute
+                "s+" : this.getSeconds(), //second
+                "q+" : Math.floor((this.getMonth()+3)/3),      //quarter
+                "S" : this.getMilliseconds() //millisecond
+            }
+
+            if(/(y+)/.test(format)) {
+                format = format.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length));
+            }
+
+            for(var k in o) {
+                if(new RegExp("("+ k +")").test(format)) {
+                    format = format.replace(RegExp.$1, RegExp.$1.length==1 ? o[k] : ("00"+ o[k]).substr((""+ o[k]).length));
+                }
+            }
+            return format;
+        }
+        $(function () {
+            var pageNo = $("#curPage").val();
+            var url ="/getCompanyList?pageNo="+pageNo;
+            function getPage(data){
+                var jsonObj = JSON.parse( data );  // JSON.parse(); 解析JSON
+                var totalRecord = jsonObj.totalRecord;   //一共几条数据
+                var dataList = jsonObj.data;    //查询出的数据
+
+                var totalPage = jsonObj.totalPage;   //共多少页
+                var pageNum = jsonObj.pageNum;    //第几页
+                var pageSize = jsonObj.pageSize;  //每页几条
+                var start = jsonObj.startPageNum;  //开始
+                var end = jsonObj.endPageNum;      //结束
+                $("#curPage").val(pageNum);
+
+                $("#totalRecord").html(totalRecord);
+                $("#totalPage").html(totalPage);
+                $("#pageSize").attr("value",pageSize);
+
+                $("tbody > *").remove();
+                if(dataList!=null){
+                    for (i = 0; i < dataList.length; i++) {
+                        $("#show_tbody").append("<tr></tr>");
+                        /* UTC 日期格式转换成 date 格式，并将日期格式进行格式化  */
+                        var date2 = new Date(dataList[i].createTime).format("yyyy-MM-dd");
+
+                        /* 转换成本地日期 */
+                        var createTime = date2.toLocaleString();
+                        $("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+dataList[i].cId+"</td>");
+                        $("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+dataList[i].cName+"</td>");
+                        $("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+dataList[i].cInfo+"</td>");
+                        $("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+dataList[i].ownName+"</td>");
+                        $("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+createTime+"</td>");
+                        $("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+dataList[i].cStatus+"</td>");
+                        $("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+"<a href='#' class='update'>修改</a>/<a href='#' class='del'>删除</a>"+"</td>");
+                    }
+                }else{
+                    $("#show_tbody").append("<label>没有数据</label>");
+                }
+
+                $(".pNum").remove();
+                $("li:empty").remove();
+                for(var i = parseInt(end); i>=parseInt(start);i--){
+                    if(i ==parseInt(pageNum) ){
+                        var li1= '<li><input style="background-color:#00FFFF" type="button" class="pNum btn" value="'+i+'"></li>'
+                        $("#lastpage").parent().after(li1);
+                    }else{
+                        var li1= '<li><input type="button" class="pNum btn btn-info" value="'+i+'"></li>'
+                        $("#lastpage").parent().after(li1);
+                    }
+                }
+
+            }
+            var type = "text";
+            $.ajax({
+                    method:'POST',
+                    url:url,
+                    //data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'CompanyService_getCompanyList'},
+                    success: getPage
+				
+				});
+            //$.post(url,getPage,type);
+
+            //页面跳转
+            $("#npage").click(function(){
+                pageNo = $("#curPage").val();
+                $("#page").val(pageNo);
+                /* alert($("#page").val()); */
+                var url ="/getCompanyList";
+                var data = $("#companyForm").serialize();
+                var type = "text";
+                $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'CompanyService_getCompanyList'},
+                    success: getPage
+				
+				});
+                //$.post(url,data,getPage,type);
+            });
+            //下一页
+            $("#nextpage").click(function(){
+                pageNo=parseInt($("#curPage").val())+1;
+                $("#page").val(pageNo);
+                /* alert($("#page").val()); */
+                var url ="/getCompanyList";
+                var data = $("#companyForm").serialize();
+                var type = "text";
+                $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'CompanyService_getCompanyList'},
+                    success: getPage
+				
+				});
+                //$.post(url,data,getPage,type);
+
+            });
+            //上一页
+            $("#lastpage").click(function(){
+                pageNo=parseInt($("#curPage").val())-1;
+                $("#page").val(pageNo);
+                /* alert($("#page").val()); */
+                var url ="/getCompanyList";
+                var data = $("#companyForm").serialize();
+                var type = "text";
+                $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'CompanyService_getCompanyList'},
+                    success: getPage
+				
+				});
+                //$.post(url,data,getPage,type);
+
+            });
+            //页码按钮跳转
+            $('#menu').on('click','.pNum',function(){
+                var pageNum = $(this).val();
+                $("#page").val(pageNum);
+                /* alert($("#page").val()); */
+                var url ="/getCompanyList";
+                var data = $("#companyForm").serialize();
+                var type = "text";
+                $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'CompanyService_getCompanyList'},
+                    success: getPage
+				
+				});
+                //$.post(url,data,getPage,type);
+            });
+            //搜索
+            $("#search").click(function(){
+                var url ="/getCompanyList";
+                /* $("#companyForm").attr("action",url); */
+                var data = $("#companyForm").serialize();
+                var type = "text";
+                $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'CompanyService_getCompanyList'},
+                    success: getPage
+				
+				});
+                // $.post(url,data,getPage,type);
+                return false;
+            });
+            //显示所有
+            $("#AllList").click(function(){
+                $("#page").val(1);
+                /* alert($("#page").val());  */
+                $(".searchEntry").val("");
+                var url ="/getCompanyList";
+                var data = $("#companyForm").serialize();
+                var type = "text";
+                $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'CompanyService_getCompanyList'},
+                    success: getPage
+				
+				});
+                //$.post(url,data,getPage,type);
+            });
+            //新建公司信息
+            $("#add").click(function () {
+                // $("#addCForm").show();
+                $("#addCForm").css({"visibility":"visible"});
+                return false;
+            });
+            //删除
+            $('#show_tbody').on('click','.del',function(){
+                var pageNo = $("#curPage").val();
+
+                var thisTd = $(this).parent();
+                var thisId = $(thisTd).siblings(":first").text();
+                //获取该用户的id  定位到父节点的第一个兄弟节点
+                function callback(data){
+                    if(data.length !=0){
+                        alert("删除成功");
+                        //重新加载用户列表
+                        getPage(data);
+                    }
+                }
+                var url="/delCompany?id="+thisId+"&pageNo="+pageNo;
+                var type = "text";
+                $.ajax({
+                    method:'POST',
+                    url:url,
+                    //data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'CompanyService_delCompany'},
+                    success: callback
+				
+				});
+                //$.post(url,callback,type);
+            });
+            //更新公司信息
+            $('#show_tbody').on('click','.update',function () {
+                var thisTd = $(this).parent();
+                var thisId = $(thisTd).siblings(":first").text();
+                var url="/getCompanyByID?cId="+thisId;
+                var type = "json";
+                function uptback(data){
+                    $("#cId").val(data.cId);
+                    $("#cName").val(data.cName);
+                    $("#cInfo").val(data.cInfo);
+                    var date2 = new Date(data.createTime).format("yyyy-MM-dd");
+                    /* 转换成本地日期 */
+                    var cTime = date2.toLocaleString();
+                    $("#cCreateTime").val(cTime);
+                    $("#cOwnName").val(data.ownName);
+                    $(":radio[name='cStatus'][value='" + data.cStatus + "']").prop("checked", "checked");
+                    $("#uptCForm").css({"visibility":"visible"});
+                }
+                $.ajax({
+                    method:'POST',
+                    url:url,
+                    //data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'CompanyService_getCompanyByID'},
+                    success: uptback
+				
+				});
+                //$.post(url,uptback,type);
+            });
+            //保存更新
+            $("#saveU").click(function () {
+                var list=$(".must2");
+                for (var i = 0; i < list.length; i++) {
+                    // 判断文本框是否为空
+                    if (list[i].value == "") {
+                        alert("请将必要信息填写完整");
+                        return false;
+                    }
+                }
+                var url = "/updateCompany";
+                var data = $("#uptForm").serialize();
+                /*alert(data);*/
+                function callback(data){
+                    // $("#addCForm").hide();
+                    $("#uptCForm").css({"visibility":"hidden"});
+                    if(data.length !=0){
+                        alert("保存成功");
+                        //重新加载用户列表
+                        getPage(data);
+
+                    }else {
+                        alert("保存失败");
+                    }
+
+                }
+                var type = "text";
+                $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'CompanyService_updateCompany'},
+                    success: callback
+				
+				});
+                //$.post(url,data,callback,type);
+                return false;
+            });
+            //保存新建公司信息
+            $("#save").click(function () {
+                var list=$(".must");
+                for (var i = 0; i < list.length; i++) {
+                    // 判断文本框是否为空
+                    if (list[i].value == "") {
+                        alert("请将必要信息填写完整");
+                        return false;
+                    }
+                }
+
+                var url = "/addCompany";
+                var data = $("#addForm").serialize();
+                alert(data);
+                function callback(data){
+                    // $("#addCForm").hide();
+                    $("#addCForm").css({"visibility":"hidden"});
+                    if(data.length !=0){
+                        alert("保存成功");
+                        //重新加载用户列表
+                        getPage(data);
+
+                    }else {
+                        alert("保存失败");
+                    }
+
+                }
+                var type = "text";
+                $.ajax({
+                    method:'POST',
+                    url:url,
+                    data: data,
+                    dataType:type,
+                    headers:{
+                        'Service-Name':'CompanyService_addCompany'},
+                    success: callback
+				
+				});
+                //$.post(url,data,callback,type);
+                return false;
+            });
+            //关闭新建窗口
+            $("#close").click(function () {
+                $("#addCForm").css({"visibility":"hidden"});
+                return false;
+            });
+            //关闭更新窗口
+            $("#closeU").click(function () {
+                $("#uptCForm").css({"visibility":"hidden"});
+                return false;
+            });
+
+        });
+    </script>
+    <style type="text/css">
+        #menu li{
+            text-decoration: none;  /*去掉前面的圆点*/
+            list-style: none;
+            float: left;
+            border: 1px solid #FFFFFF;
+
+        }
+        #menu li a{
+            text-decoration: none;
+        }
+
+        #menu li a:hover{
+            background-color: #FCFCFC;
+        }
+        .toast{
+            width:700px;
+            height:400px;
+            background:transparent;
+            background:#AFAFAF;
+            border-radius:8px;
+            position: fixed;
+            margin:auto;left:0; right:0; top:0; bottom:0;
+            z-index: 1;
+
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <form action="" method="post" id="companyForm">
+
+        <div style="padding-top: 1%;padding-bottom: 1%;padding-left: 1%;">
+            <ul class="nav">
+
+                <li class="nav-item" style="padding-right: 30px;">
+                    <a href="#" id="AllList" ><h3>公司列表</h3></a>
+                </li>
+                <li class="nav-item" style="padding-right: 5px;width: 100px;">
+                    <input type="hidden" name="pageNo" id="page" value="1">
+                </li>
+                <li class="nav-item" style="padding-right: 5px;width: 100px;">
+                    <input type="text" name="search_cId" class="form-control searchEntry"  placeholder="公司号" >
+                </li>
+                <li class="nav-item" style="padding-right: 5px;width: 100px;">
+                    <input type="text" name="search_cName" class="form-control searchEntry" placeholder="公司名" >
+                </li>
+                <li class="nav-item" style="padding-right: 10px">
+                    <button class="btn btn-info" id="search">搜索</button>
+                </li>
+                <li class="nav-item" style="padding-right: 10px;">
+                    <button class="btn btn-default" id="add">添加</button>
+                </li>
+            </ul>
+        </div>
+
+        <table  class="table table-striped" id="tb">
+            <thead >
+               <tr>
+                   <th class="data_title" style="text-align: center;" >公司编号</th>
+                   <th class="data_title" style="text-align: center;" >公司名称</th>
+                   <th class="data_title" style="text-align: center;" >公司信息</th>
+                   <th class="data_title" style="text-align: center;" >公司责任人</th>
+                   <th class="data_title" style="text-align: center;" >公司创建时间</th>
+                   <th class="data_title" style="text-align: center;" >公司状态</th>
+               </tr>
+            </thead>
+            <tbody id="show_tbody">
+
+            </tbody>
+
+        </table>
+        <div style="padding-left: 50%;" >
+            <ul  id="menu">
+                <li><input id="lastpage" type="button" class="btn btn-default" value="上一页" ></li>
+                <li><input id="nextpage" type="button" class="btn btn-default" value="下一页"></li>
+                <li><input id="curPage" type="text" class="form-control" value="1" size="2"></li>
+                <li><input id="npage" type="button" class="btn btn-default" value="跳转"></li>
+                <li class="list-group-item"> <span>共</span> <label id="totalRecord"></label><span>条记录</span><label id="totalPage"></label><span>页</span></li>
+            </ul>
+        </div>
+    </form>
+
+    <div id="addCForm"  class="toast" style="visibility:hidden; ">
+        <label style="margin: 5px 0 15px 40%;"><span style="color: black">新建公司信息</span></label>
+        <form method="post" action="" id="addForm">
+            <table class="table table-striped" id="aTb">
+                <thead>
+                <tr>
+                    <th class="data_cell" style="text-align: center;"><span style="color: black">公司名称</span></th>
+                    <th>
+                        <input type="text" class="must" name="cName">
+                    </th>
+                    <th class="data_cell" style="text-align: center;"><span style="color: black">公司信息</span></th>
+                    <th>
+                        <input type="text" class="must" name="cInfo">
+                    </th>
+                </tr>
+                <tr>
+                    <th class="data_cell" style="text-align: center;"><span style="color: black">责任人</span></th>
+                    <th>
+                        <input type="text" class="must" name="ownName">
+                    </th>
+                    <th class="data_cell" style="text-align: center;"><span style="color: black">创建时间</span></th>
+                    <th>
+                        <input type="date" class="must" name="createTime">
+                    </th>
+                </tr>
+                <tr>
+                    <th class="data_cell" style="text-align: center;"><span style="color: black">信息是否可用</span></th>
+                    <th>
+                        <input type="radio" name="cStatus" checked="checked" value="1"><span style="color: black">可用</span>
+                        <input type="radio" name="cStatus" value="0"><span style="color: black">不可用</span>
+                    </th>
+                    <th class="data_cell" style="text-align: center;">
+
+                    </th>
+                    <th></th>
+                </tr>
+                </thead>
+            </table>
+
+            <div class="button_bar" style="margin: 30px  0 0 30%">
+                <button class="btn btn-default" id="close">关闭</button>
+                <button class="btn btn-info" id="save" style="margin-left: 40px;">保存</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="uptCForm"  class="toast" style="visibility:hidden; ">
+    <label style="margin: 5px 0 15px 40%;"><span style="color: black">更新公司信息</span></label>
+    <form method="post" action="" id="uptForm">
+        <table class="table table-striped" id="uTb">
+            <thead>
+            <tr>
+                <th class="data_cell" style="text-align: center;"><span style="color: black">公司名称</span></th>
+                <th>
+                    <input type="text" class="must2" name="cName" id="cName">
+                </th>
+                <th class="data_cell" style="text-align: center;"><span style="color: black">公司信息</span></th>
+                <th>
+                    <input type="text" class="must2" name="cInfo" id="cInfo">
+                </th>
+            </tr>
+            <tr>
+                <th class="data_cell" style="text-align: center;"><span style="color: black">责任人</span></th>
+                <th>
+                    <input type="text" class="must2" name="ownName" id="cOwnName">
+                </th>
+                <th class="data_cell" style="text-align: center;"><span style="color: black">创建时间</span></th>
+                <th>
+                    <input type="date" class="must2" name="createTime" id="cCreateTime">
+                </th>
+            </tr>
+            <tr>
+                <th class="data_cell" style="text-align: center;"><span style="color: black">信息是否可用</span></th>
+                <th>
+                    <input type="radio" name="cStatus" checked="checked" value="1"><span style="color: black">可用</span>
+                    <input type="radio" name="cStatus" value="0"><span style="color: black">不可用</span>
+                </th>
+                <th class="data_cell" style="text-align: center;"> <span style="color: black">公司编号</span></th>
+                <th>
+                    <input type="text" name="cId" readonly="readonly" id="cId">
+                </th>
+            </tr>
+            </thead>
+        </table>
+
+        <div class="button_bar" style="margin: 30px  0 0 30%">
+            <button class="btn btn-default" id="closeU">关闭</button>
+            <button class="btn btn-info" id="saveU" style="margin-left: 40px;">保存</button>
+        </div>
+    </form>
+    </div>
+
+</body>
+</html>

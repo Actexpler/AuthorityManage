@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>人员列表</title>
+<link href="../../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<script src="../../js/jquery.min.js"></script>
+<script type="text/javascript">
+           //日期格式化方法
+			Date.prototype.format = function(format){ 
+				var o = { 
+			    	"M+" : this.getMonth()+1, //month 
+			    	"d+" : this.getDate(), //day 
+			    	"h+" : this.getHours(), //hour 
+			    	"m+" : this.getMinutes(), //minute 
+			    	"s+" : this.getSeconds(), //second 
+			    	"q+" : Math.floor((this.getMonth()+3)/3),      //quarter 
+			    	"S" : this.getMilliseconds() //millisecond 
+				} 
+			
+				if(/(y+)/.test(format)) { 
+					format = format.replace(RegExp.$1, (this.getFullYear()+"").substr(4 - RegExp.$1.length)); 
+				} 
+			
+				for(var k in o) { 
+			    	if(new RegExp("("+ k +")").test(format)) { 
+			    		format = format.replace(RegExp.$1, RegExp.$1.length==1 ? o[k] : ("00"+ o[k]).substr((""+ o[k]).length)); 
+			    	} 
+			    } 
+			    return format; 
+			}
+	//页面加载		
+    $(function(){
+    	var pageNo = $("#curPage").val();
+    	var url ="/getUserList?pageNo="+pageNo;
+    	function getPage(data){
+    		 var jsonObj = JSON.parse( data );  // JSON.parse(); 解析JSON
+			 var totalRecord = jsonObj.totalRecord;   //一共几条数据
+			 var users = jsonObj.data;    //查询出的数据
+
+				 var totalPage = jsonObj.totalPage;   //共多少页
+				 var pageNum = jsonObj.pageNum;    //第几页
+				 var pageSize = jsonObj.pageSize;  //每页几条
+				 var start = jsonObj.startPageNum;  //开始
+				 var end = jsonObj.endPageNum;      //结束
+				 $("#curPage").val(pageNum);
+				
+				 $("#totalRecord").html(totalRecord);
+				 $("#totalPage").html(totalPage);
+				 $("#pageSize").attr("value",pageSize);
+				 
+				 $("tbody > *").remove();
+				 if( users.length != 0 ){
+					 for (i = 0; i < users.length; i++) {
+							$("#show_tbody").append("<tr></tr>");
+						    var date2;
+						    var valu = "无";
+						    var birthday ="无";
+
+							if(users[i].birthday != null){
+                                /* UTC 日期格式转换成 date 格式，并将日期格式进行格式化  */
+                                date2 = new Date(users[i].birthday).format("yyyy-MM-dd");
+                                /* 转换成本地日期 */
+                                birthday = date2.toLocaleString();
+
+							}
+							 var r_name = users[i].uRole==null?valu:users[i].uRole.rName;
+							 var d_name = users[i].uDepart==null?valu:users[i].uDepart.dName;
+							 var  sex =users[i].sex==1?"男":"女";
+                             var age = users[i].age==null?valu:users[i].age;
+							$("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+users[i].uId+"</td>");
+							$("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+users[i].uName+"</td>");
+							$("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+r_name+"</td>");
+							$("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+d_name+"</td>");
+							$("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+sex+"</td>");
+							$("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+age+"</td>");
+							$("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+birthday+"</td>");
+							$("#show_tbody tr:last").append("<td class='data_cell' style='text-align: center;'>"+"<a href='#' class='uptUser'>修改</a>/<a href='#' class='delUser'>删除</a>"+"</td>");
+							/* $("#show_tbody").append("</tr>"); */
+						  } 
+				 }else{
+					 $("#show_tbody").append("<label>没有数据</label>");
+				 }
+				   
+				   $(".pNum").remove();
+				   $("li:empty").remove();
+				   for(var i = parseInt(end); i>=parseInt(start);i--){
+					   if(i ==parseInt(pageNum) ){
+						   var li1= '<li><input style="background-color:#00FFFF" type="button" class="pNum btn" value="'+i+'"></li>'
+						   $("#lastpage").parent().after(li1);
+					   }else{
+						   var li1= '<li><input type="button" class="pNum btn btn-info" value="'+i+'"></li>'
+						   $("#lastpage").parent().after(li1);
+					   } 
+				  }	
+			 
+		} 
+		var type = "text";
+		$.ajax({
+                    method:'POST',
+					url:url,
+					dataType:type,
+                    headers:{
+                      'Service-Name':'UserService_getUserList'},
+                    success: getPage
+                   
+                 });
+        //$.post(url,getPage,type);	
+
+        //页面跳转
+    	$("#npage").click(function(){
+    		pageNo = $("#curPage").val();
+    		$("#page").val(pageNo);
+    		/* alert($("#page").val()); */
+    		var url ="/getUserList";
+    		var data = $("#userForm").serialize();
+			var type = "text";
+			   
+			$.ajax({
+				method:'POST',
+				url:url,
+				data: data,
+				dataType:type,
+				headers:{
+					'Service-Name':'UserService_getUserList'},
+				success: getPage
+				
+				});
+	        //$.post(url,data,getPage,type);		
+    	});
+    	//下一页
+    	$("#nextpage").click(function(){
+    		pageNo=parseInt($("#curPage").val())+1;
+    		$("#page").val(pageNo);
+    		/* alert($("#page").val()); */
+    		var url ="/getUserList";
+    		var data = $("#userForm").serialize();
+			var type = "text";
+			$.ajax({
+				method:'POST',
+				url:url,
+				data: data,
+				dataType:type,
+				headers:{
+					'Service-Name':'UserService_getUserList'},
+				success: getPage
+				
+				});   
+
+	        //$.post(url,data,getPage,type);	
+
+    	});
+    	//上一页
+    	$("#lastpage").click(function(){
+    		pageNo=parseInt($("#curPage").val())-1;
+    		$("#page").val(pageNo);
+    		/* alert($("#page").val()); */
+    		var url ="/getUserList";
+    		var data = $("#userForm").serialize();
+			var type = "text";
+			$.ajax({
+				method:'POST',
+				url:url,
+				data: data,
+				dataType:type,
+				headers:{
+					'Service-Name':'UserService_getUserList'},
+				success: getPage
+				
+				});   
+
+	        //$.post(url,data,getPage,type);		
+
+    	});
+    	//删除
+    	$('#show_tbody').on('click','.delUser',function(){
+    		var pageNo = $("#curPage").val();
+    		
+    	    var thisTd = $(this).parent();
+    	    var thisId = $(thisTd).siblings(":first").text();
+    	    //获取该用户的id  定位到父节点的第一个兄弟节点
+    	    function callback(data){
+    	    	if(data.length !=0){
+    	    		alert("删除成功");
+    	    		//重新加载用户列表
+    	    		getPage(data);
+    	    	}
+    	    }
+    	    var url="/delUser?id="+thisId+"&pageNo="+pageNo;
+			var type = "text";
+
+			$.ajax({
+				method:'POST',
+				url:url,
+				dataType:type,
+				headers:{
+					'Service-Name':'UserService_delUser'},
+				success: callback
+				
+				});
+    	    //$.post(url,callback,type);
+    	});
+
+    	//页码按钮跳转
+    	$('#menu').on('click','.pNum',function(){
+    		var pageNum = $(this).val();
+    		$("#page").val(pageNum);
+    		/* alert($("#page").val()); */
+    		var url ="/getUserList";
+    		var data = $("#userForm").serialize();
+			var type = "text";
+			$.ajax({
+				method:'POST',
+				url:url,
+				data: data,
+				dataType:type,
+				headers:{
+					'Service-Name':'UserService_getUserList'},
+				success: getPage
+				
+				});  
+			   
+
+	        //$.post(url,data,getPage,type);	
+    	});
+    	
+    	//搜索
+    	$("#searchUser").click(function(){
+    		var url ="/getUserList";
+    		/* $("#userForm").attr("action",url); */
+    		var data = $("#userForm").serialize();
+			var type = "text";
+
+			$.ajax({
+				method:'POST',
+				url:url,
+				data: data,
+				dataType:type,
+				headers:{
+					'Service-Name':'UserService_getUserList'},
+				success: getPage
+				
+				});  
+			
+ 	        //$.post(url,data,getPage,type);
+    		return false;
+    	});
+    	$("#AllList").click(function(){
+    		$("#page").val(1);
+    		/* alert($("#page").val());  */
+    		$(".searchEntry").val("");
+    		var url ="/getUserList";
+    		var data = $("#userForm").serialize();
+   		    var type = "text";
+			   $.ajax({
+				method:'POST',
+				url:url,
+				data: data,
+				dataType:type,
+				headers:{
+					'Service-Name':'UserService_getUserList'},
+				success: getPage
+				
+				});  
+
+			   //$.post(url,data,getPage,type);
+		});
+		
+        //更新用户信息
+        $('#show_tbody').on('click','.uptUser',function() {
+            var pageNo = $("#curPage").val();
+
+            var thisTd = $(this).parent();
+            var thisId = $(thisTd).siblings(":first").text();
+            window.location.href="./uptUser.html?pageNo="+pageNo+"&uId="+thisId;
+		});
+		//新建用户
+		$("#add").click(function () {
+			window.location.href="./addUser.html";
+			return false;
+        });
+
+    });
+
+</script>
+<style type="text/css">   
+        #menu li{  
+            text-decoration: none;  /*去掉前面的圆点*/  
+            list-style: none;  
+            float: left;  
+            border: 1px solid #FFFFFF;  
+            
+        }  
+        #menu li a{  
+            text-decoration: none;  
+        }  
+      
+        #menu li a:hover{   
+            background-color: #FCFCFC;  
+        }  
+
+
+    </style> 
+</head>
+<body>
+     
+   <form action="" id="userForm">
+       <div style="padding-top: 1%;padding-bottom: 1%;padding-left: 1%;">
+			<ul class="nav">
+			   
+			  <li class="nav-item" style="padding-right: 30px;">
+		         <a href="#" id="AllList" ><h3>人员列表</h3></a>
+			  </li>
+			  <li class="nav-item" style="padding-right: 5px;width: 100px;">
+		         <input type="hidden" name="pageNo" id="page" value="1">
+			  </li>
+		      <li class="nav-item" style="padding-right: 5px;width: 100px;">
+		         <input type="text" name="search_uId" class="form-control searchEntry"  placeholder="员工号" >
+			  </li>
+			  <li class="nav-item" style="padding-right: 5px;width: 100px;">
+			    <input type="text" name="search_uName" class="form-control searchEntry" placeholder="姓名" >
+			  </li>
+			  <li class="nav-item" style="padding-right: 5px;width: 100px;">
+		         <input type="text" name="search_uRole" class="form-control searchEntry" placeholder="角色" >
+			  </li>
+			  <li class="nav-item" style="padding-right: 5px;width: 100px;">
+			    <input type="text" name="search_uDepart" class="form-control searchEntry" placeholder="部门" >
+			  </li>
+			  <li class="nav-item" style="padding-right: 10px">
+			     <button class="btn btn-info" id="searchUser">搜索</button>
+			  </li>
+			  <li class="nav-item" style="padding-right: 10px;">
+			    <button class="btn btn-default" id="add">添加</button>
+			  </li>
+			</ul>
+      </div>
+     
+      <table class="table table-striped" id="tb">
+         <thead>
+             <tr>
+               <th  class="data_title" style="text-align: center;" >编号</th>
+               <th  class="data_title" style="text-align: center;" >姓名</th>
+               <th  class="data_title" style="text-align: center;" >角色</th>
+               <th  class="data_title" style="text-align: center;" >部门</th>
+               <th  class="data_title" style="text-align: center;" >性别</th>
+               <th  class="data_title" style="text-align: center;" >年龄</th>
+               <th  class="data_title" style="text-align: center;" >生日</th>
+               <th  class="data_title" style="text-align: center;" >操作</th>
+             </tr>
+         </thead>
+         <tbody id="show_tbody">
+         </tbody>
+      
+      </table>
+      
+      <div style="padding-left: 50%;" >
+	      <ul  id="menu">
+	        <li><input id="lastpage" type="button" class="btn btn-default" value="上一页" ></li>
+			<li><input id="nextpage" type="button" class="btn btn-default" value="下一页"></li>
+			<li><input id="curPage" type="text" class="form-control" value="1" size="2"></li>	
+			<li><input id="npage" type="button" class="btn btn-default" value="跳转"></li>
+			<li class="list-group-item"> <span>共</span> <label id="totalRecord"></label><span>条记录</span><label id="totalPage"></label><span>页</span></li>
+		  </ul>
+      </div>
+   
+   </form>
+</body>
+</html>
